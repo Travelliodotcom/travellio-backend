@@ -1,25 +1,19 @@
-const MongoClient = require('mongodb').MongoClient;
+const db = require('../app/utils/databaseHelper');
+require('dotenv').config();
+const itineraryService = require('../app/models/itinerary/service');
 
 module.exports = async function (context, req) {
+
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    // Your MongoDB connection string
-    const uri = process.env.CONN_STRING;
-    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
     try {
-        await client.connect();
+        await db.connect();
 
-        // Replace 'your_db_name' and 'your_collection_name' with your actual database and collection names
-        const database = client.db("TravellioDB");
-        const collection = database.collection("ItenaryCollection");
-        
-        // Example: find one document
-        const doc = await collection.findOne({});
+        const data = await itineraryService.getAllItineraries({});
 
         context.res = {
-            // status: 200, /* Defaults to 200 */
-            body: doc
+            status: 200, /* Defaults to 200 */
+            body: data
         };
 
     } catch (error) {
@@ -28,6 +22,6 @@ module.exports = async function (context, req) {
             body: "Error connecting to MongoDB: " + error.message
         };
     } finally {
-        await client.close();
+        await db.close();
     }
 };
