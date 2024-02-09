@@ -5,8 +5,8 @@ const create = async (profile) => {
     try {
 
         // TODO: Add zod to add core validation support (@shravan20)
-        if (profile.name || profile.email || profile.username) {
-            throw new Error()
+        if (!profile.name || !profile.email || !profile.username) {
+            throw new Error("Required fields are not provided")
         }
 
         let user = await repository.findOne({ email: profile.email });
