@@ -1,5 +1,6 @@
 const { find } = require('./model');
 const repository = require('./repository');
+const validation = require('./validation');
 
 const create = async (profile) => {
     try {
@@ -19,12 +20,55 @@ const create = async (profile) => {
             throw new Error('User already exists for this email');
         }
 
-        return await repository.createProfile(profile);
+        return await createUser(profile);
     } catch (error) {
         throw error;
     }
 }
 
+async function createUser(profile) {
+    return await repository.createProfile(profile);
+}
+
+
+const signIn = async (profile) => {
+    try {
+        await validation.profileSchema.parse(profile);
+
+        let profile = await repository.findOne({ email: profile.email });
+
+        if (!profile) {
+            profile = await createUser(profile);
+        }
+
+        /**
+         * TODO: Move this to env later
+         */
+        // Access Token Expiry Time +1 hr
+        let accessTokenTimeToExpire = Math.floor(Date.now() / 1000) + (60 * 60);
+        // Refresh Token Expiry Time +8 hr
+        let refreshTokenTimeToExpire = Math.floor(Date.now() / 1000) + (8 * (60 * 60));
+
+        let response = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            accessToken: jwt.jwtGenerator({
+                id: user._id,
+                email: user.email,
+            }, accessTokenTimeToExpire),
+            refreshToken: jwt.jwtGenerator({
+                id: user._id,
+                email: user.email,
+            }, refreshTokenTimeToExpire)
+        }
+
+        return response;
+    } catch (error) {
+        throw error;
+    }
+
+}
 
 const findAll = async () => {
     return await repository.find();

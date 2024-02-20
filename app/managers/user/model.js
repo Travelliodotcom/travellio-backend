@@ -8,9 +8,7 @@ const profileSchema = new Schema({
     rating: Number,
     profilePic: String,
     gender: String,
-    countries: [{
-        Name: String
-    }],
+    countries: [String],
     ethnicity: String,
     biography: String,
 });
